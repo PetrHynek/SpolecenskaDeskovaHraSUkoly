@@ -1,0 +1,57 @@
+﻿<Page x:Class="SpolecenskaDeskovaHraSUkoly.Views.GamePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:SpolecenskaDeskovaHraSUkoly.Views"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="GamePage">
+
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+
+
+        <!-- Placeholder hrací deska -->
+        <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="2" CornerRadius="6" Padding="8">
+            <StackPanel>
+                <TextBlock Text="Hrací deska (placeholder)" FontSize="16" FontWeight="Bold" />
+                <TextBlock Text="(sem později přidáme vizuální pole / cesty)" Margin="0,8,0,12" />
+                <!-- Vykreslit políčka později -->
+                <Canvas x:Name="BoardCanvas" Height="300" Background="#FFF8F8F8" />
+            </StackPanel>
+        </Border>
+
+
+        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+            <TextBlock Text="Ovládací panel" FontSize="16" FontWeight="Bold" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
+                <Button x:Name="ButtonDiceRoll" Content="Hod kostkou" Width="120" Click="ButtonDiceRoll_Click" />
+                <TextBlock Text=" Výsledek: " VerticalAlignment="Center" Margin="8,0,0,0" />
+                <Label x:Name="LabelDiceResult" Content="-" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <Separator />
+
+            <TextBlock Text="Hráči" FontWeight="Bold" Margin="0,8,0,4" />
+            <ListBox x:Name="PlayersListBox" Height="120" />
+
+
+
+            <TextBlock Text="Poslední načtený úkol:" FontWeight="Bold" Margin="0,12,0,2" />
+            <TextBlock x:Name="TxtLastTask" Text="(žádný)" TextWrapping="Wrap" />
+
+
+            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                <Button Content="Uložit hru" Width="100" IsEnabled="False" />
+                <Button Content="Načíst hru" Width="100" Margin="8,0,0,0" IsEnabled="False" />
+            </StackPanel>
+
+        </StackPanel>
+
+    </Grid>
+</Page>

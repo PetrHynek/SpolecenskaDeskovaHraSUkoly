@@ -1,0 +1,7 @@
+[
+	{ "id": 1, "type": "Pantomima", "text": "Hrát na klavír" },
+	{ "id": 2, "type": "Popis", "text": "Auto, které má čtyři kola" },
+	{ "id": 3, "type": "Kreslení", "text": "Slunce s mraky" },
+	{ "id": 4, "type": "Hádání", "text": "Zvíře s pruhy (tygr)" },
+	{ "id": 5, "type": "Otázka", "text": "Jaké je hlavní město Francie?" }
+]
