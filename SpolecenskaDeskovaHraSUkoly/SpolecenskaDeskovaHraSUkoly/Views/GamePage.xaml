@@ -8,7 +8,7 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="GamePage">
 
-    <Grid Margin="10">
+    <Grid x:Name="MainGrid" Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*" />
             <ColumnDefinition Width="2*" />
@@ -53,5 +53,53 @@
 
         </StackPanel>
 
+        <Grid x:Name="Overlay" Background="#88000000" Visibility="Collapsed" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" IsHitTestVisible="True" Grid.ColumnSpan="2">
+            <Grid x:Name="TaskGrid" Width="400" Height="200" Background="White" Opacity="0.95">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock x:Name="TaskTypeText" FontSize="28" FontWeight="Bold" TextAlignment="Center" Grid.Row="0" VerticalAlignment="Center" />
+                <TextBlock x:Name="TaskInstructionText" FontSize="18" TextAlignment="Center" TextWrapping="Wrap" Grid.Row="1" VerticalAlignment="Center" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="2">
+                    <Button x:Name="BackButton1" Content="Zpět" Width="120" Height="40" Margin="0,0,5,0" Click="BackButton_Click" />
+                    <Button x:Name="ContinueButton" Content="Pokračovat" Width="120" Height="40" Margin="5,0,0,0" Click="ContinueButton_Click" />
+                    <Button x:Name="TaskButton" Content="Zobrazit úkol" Width="200" Height="40" Margin="5,0,0,0" VerticalAlignment="Center" Click="TaskButton_Click"/>
+                </StackPanel>
+            </Grid>
+
+
+            <Grid x:Name="CountdownGrid" Width="300" Height="150" Background="White" Opacity="0.95">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="2*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock x:Name="CountdownText" Text="5" FontSize="48" FontWeight="Bold" TextAlignment="Center" Grid.Row="0" VerticalAlignment="Bottom" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1">
+                    <Button x:Name="FailButton" Content="Vzdat úkol" Width="120" Height="40" Visibility="Collapsed" Margin="0,0,5,0" Click="FailButton_Click"/>
+                    <Button x:Name="SuccessButton" Content="Úkol splněn" Width="120" Height="40" Margin="5,0,0,0" Visibility="Collapsed" Click="SuccessButton_Click" />
+                </StackPanel>
+            </Grid>
+
+            <Grid x:Name="CorrectAnswerGrid" Width="400" Height="200" Background="White" Opacity="0.95">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock FontSize="28" Text="Správně!" FontWeight="Bold" TextAlignment="Center" Grid.Row="0" VerticalAlignment="Center" />
+                <TextBlock FontSize="16" Text="Který hráč odpověděl správně:" TextAlignment="Center" Grid.Row="1" VerticalAlignment="Center" />
+                <ComboBox x:Name="ComboBoxPlayerAnswered" Width="200" Height="30" Grid.Row="2" SelectionChanged="ComboBoxPlayerAnswered_SelectionChanged" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="3">
+                    <Button x:Name="BackButton2" Content="Zpět" Width="120" Height="40" Margin="0,0,5,0" Click="BackButton_Click" />
+                    <Button x:Name="AddPointsButton" Content="Připsat body" Width="120" Height="40" Margin="5,0,0,0" Click="AddPointsButton_Click" />
+                </StackPanel>
+            </Grid>
+        </Grid>
     </Grid>
 </Page>

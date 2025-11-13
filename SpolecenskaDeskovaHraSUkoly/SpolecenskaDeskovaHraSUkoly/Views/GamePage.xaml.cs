@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace SpolecenskaDeskovaHraSUkoly.Views
 {
@@ -27,6 +28,12 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
         private TaskService _taskService;
         private GameState _gameState;
         private MainWindow _mainWindow;
+
+        private TaskItem _currentTask;
+        private bool _taskRevealed = false;
+        private int _timeRemaining;
+        private bool _isMainCountdown = false;
+        private bool _taskCorrect = false;
 
         public GamePage(MainWindow mainWindow, List<Player> players)
         {
@@ -74,15 +81,195 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
 
             int boardSize = 20;
             _gameState.Players[current].Position %= boardSize;
-
-            ShowRandomTask();
-
-            _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
             RefreshPlayersList();
 
-            ButtonDiceRoll.IsEnabled = true;
+            ShowRandomTask();
         }
 
+        private void ShowTaskOverlay(TaskItem task, string currentPlayerName)
+        {
+            _currentTask = task;
+            _taskRevealed = false;
+
+            TaskTypeText.Text = task.Type;
+            TaskInstructionText.Text = $"Všichni hráči kromě {currentPlayerName} se otočí, aby neviděli zadání!";
+            TaskButton.Content = "Zobrazit úkol";
+
+            TaskGrid.Visibility = Visibility.Visible;
+            TaskButton.Visibility = Visibility.Visible;
+            BackButton1.Visibility = Visibility.Collapsed;
+            ContinueButton.Visibility = Visibility.Collapsed;
+            CountdownGrid.Visibility = Visibility.Collapsed;
+            CorrectAnswerGrid.Visibility = Visibility.Collapsed;
+            Overlay.Visibility = Visibility.Visible;
+        }
+
+        private void HideTaskOverlay()
+        {
+            Overlay.Visibility = Visibility.Collapsed;
+            _currentTask = null;
+        }
+
+        private async void TaskButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_currentTask == null)
+            {
+                return;
+            }
+
+            if (!_taskRevealed)
+            {
+                TaskInstructionText.Text = _currentTask.Text;
+                TaskButton.Content = "Pokračovat";
+                _taskRevealed = true;
+            }
+            else
+            {
+                TaskGrid.Visibility = Visibility.Collapsed;
+                CountdownGrid.Visibility = Visibility.Visible;
+                await StartCountdownAsync(5, false);
+
+                await StartCountdownAsync(10, true);
+            }
+        }
+
+        private async Task StartCountdownAsync(int seconds, bool isMain)
+        {
+            _timeRemaining = seconds;
+            _isMainCountdown = isMain;
+
+            CountdownText.Text = _timeRemaining.ToString();
+            FailButton.Visibility = Visibility.Collapsed;
+            if(_isMainCountdown)
+            {
+                SuccessButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                SuccessButton.Visibility = Visibility.Collapsed;
+            }
+            
+
+            for (int i = _timeRemaining; i > 0 && !_taskCorrect; i--)
+            {
+                CountdownText.Text = i.ToString();
+                await Task.Delay(1000);
+            }
+
+            if(!_isMainCountdown)
+            {
+                CountdownText.Text = "Start!";
+                await Task.Delay(1000);
+                return;
+            }
+
+            CountdownText.Text = "Konec!";
+            FailButton.Visibility = Visibility.Visible;
+            SuccessButton.Visibility = Visibility.Visible;
+        }
+
+        private void FailButton_Click(object sender, RoutedEventArgs e)
+        {
+            FailButton.IsEnabled = false;
+            SuccessButton.IsEnabled = false;
+
+            CountdownGrid.Visibility = Visibility.Collapsed;
+            TaskGrid.Visibility = Visibility.Visible;
+            TaskInstructionText.Text = _currentTask.Text;
+            TaskButton.Visibility = Visibility.Collapsed;
+            BackButton1.Visibility = Visibility.Visible;
+            ContinueButton.Visibility = Visibility.Visible;
+        }
+
+        private void ContinueButton_Click(object sender, RoutedEventArgs e)
+        {
+            TaskGrid.Visibility = Visibility.Collapsed;
+
+            NextPlayerTurn();
+        }
+
+        private void SuccessButton_Click(object sender, RoutedEventArgs e)
+        {
+            _taskCorrect = true;
+
+            FailButton.IsEnabled = false;
+            SuccessButton.IsEnabled = false;
+
+            CountdownGrid.Visibility = Visibility.Collapsed;
+            CorrectAnswerGrid.Visibility = Visibility.Visible;
+
+            List<string> playerNames = new List<string>();
+            foreach (Player p in _gameState.Players)
+            {
+                if(p.Name != _gameState.Players[_gameState.CurrentPlayerIndex].Name)
+                {
+                    playerNames.Add(p.Name);
+                }
+            }
+            ComboBoxPlayerAnswered.ItemsSource = playerNames;
+
+            AddPointsButton.IsEnabled = false;
+        }
+
+        private void ComboBoxPlayerAnswered_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ComboBoxPlayerAnswered.SelectedItem != null)
+            {
+                AddPointsButton.IsEnabled = true;
+            }
+            else
+            {
+                AddPointsButton.IsEnabled = false;
+            }
+        }
+
+        private void AddPointsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var currentPlayer = _gameState.Players[_gameState.CurrentPlayerIndex];
+
+            currentPlayer.Score += 2;
+
+            string selectedPlayerName = ComboBoxPlayerAnswered.SelectedItem as string;
+            if(selectedPlayerName != null)
+            {
+                foreach(Player p in _gameState.Players)
+                {
+                    if(p.Name == selectedPlayerName)
+                    {
+                        p.Score += 1;
+                        break;
+                    }
+                }
+            }
+
+            RefreshPlayersList();
+
+            NextPlayerTurn();
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            FailButton.IsEnabled = true;
+            SuccessButton.IsEnabled = true;
+
+            CountdownGrid.Visibility = Visibility.Visible;
+            CorrectAnswerGrid.Visibility = Visibility.Collapsed;
+            TaskGrid.Visibility = Visibility.Collapsed;
+
+        }
+
+        private void NextPlayerTurn()
+        {
+            _gameState.CurrentPlayerIndex = (_gameState.CurrentPlayerIndex + 1) % _gameState.Players.Count;
+
+            _taskCorrect = false;
+            ComboBoxPlayerAnswered.SelectedItem = null;
+            FailButton.IsEnabled = true;
+            SuccessButton.IsEnabled = true;
+            RefreshPlayersList();
+            HideTaskOverlay();
+            ButtonDiceRoll.IsEnabled = true;
+        }
 
         private async void GamePage_Loaded(object sender, RoutedEventArgs e)
         {
@@ -137,7 +324,7 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
             int index = _rnd.Next(0, _tasks.Count);
             TaskItem task = _tasks[index];
 
-            TxtLastTask.Text = $"{task.Type}: {task.Text}";
+            ShowTaskOverlay(task, _gameState.Players[_gameState.CurrentPlayerIndex].Name);
         }
 
         private void ButtonNewGame_Click(object sender, RoutedEventArgs e)

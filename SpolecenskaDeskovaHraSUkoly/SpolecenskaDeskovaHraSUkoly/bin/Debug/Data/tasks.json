@@ -1,7 +1,17 @@
 [
-	{ "id": 1, "type": "Pantomima", "text": "Hrát na klavír" },
-	{ "id": 2, "type": "Popis", "text": "Auto, které má čtyři kola" },
-	{ "id": 3, "type": "Kreslení", "text": "Slunce s mraky" },
-	{ "id": 4, "type": "Hádání", "text": "Zvíře s pruhy (tygr)" },
-	{ "id": 5, "type": "Otázka", "text": "Jaké je hlavní město Francie?" }
+	{ "id": 1, "type": "Pantomima", "text": "Hrát na housle" },
+	{ "id": 2, "type": "Pantomima", "text": "Jet na kole" },
+	{ "id": 3, "type": "Pantomima", "text": "Tančit balet" },
+	{ "id": 4, "type": "Pantomima", "text": "Plavat" },
+	{ "id": 5, "type": "Pantomima", "text": "Číst knihu" },
+	{ "id": 6, "type": "Popis", "text": "Telefon" },
+	{ "id": 7, "type": "Popis", "text": "Klíč" },
+	{ "id": 8, "type": "Popis", "text": "Káva" },
+	{ "id": 9, "type": "Popis", "text": "Zmrzlina" },
+	{ "id": 10, "type": "Popis", "text": "Klobouk" },
+	{ "id": 11, "type": "Kreslení", "text": "Kočka" },
+	{ "id": 12, "type": "Kreslení", "text": "Loď" },
+	{ "id": 13, "type": "Kreslení", "text": "Rybník" },
+	{ "id": 14, "type": "Kreslení", "text": "Kaktus" },
+	{ "id": 15, "type": "Kreslení", "text": "Strom" }
 ]

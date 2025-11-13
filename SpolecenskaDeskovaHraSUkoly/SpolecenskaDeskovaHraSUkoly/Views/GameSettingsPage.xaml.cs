@@ -23,6 +23,7 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
     {
         private MainWindow _mainWindow;
         private List<Player> _existingPlayers;
+        private List<string> _allColors = new List<string> { "Red", "Blue", "Green", "Yellow", "Purple", "Orange" };
 
         public GameSettingsPage(MainWindow mainWindow, List<Player> existingPlayers = null)
         {
@@ -49,26 +50,30 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
             for (int i = 0; i < playerCount; i++)
             {
                 var player = _existingPlayers[i];
-                StackPanel playerPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 5, 0, 5) };
-
-                TextBlock playerLabel = new TextBlock { Text = $"Hráč {i + 1}:", Width = 60, VerticalAlignment = VerticalAlignment.Center };
-                TextBox playerName = new TextBox { Width = 120, Margin = new Thickness(5, 0, 5, 0), Text = player.Name };
-                ComboBox playerColor = new ComboBox { Width = 100 };
-
-                playerColor.Items.Add("Red");
-                playerColor.Items.Add("Blue");
-                playerColor.Items.Add("Green");
-                playerColor.Items.Add("Yellow");
-                playerColor.Items.Add("Purple");
-                playerColor.Items.Add("Orange");
-                playerColor.SelectedItem = player.Color;
-
-                playerPanel.Children.Add(playerLabel);
-                playerPanel.Children.Add(playerName);
-                playerPanel.Children.Add(playerColor);
-
+                StackPanel playerPanel = CreatePlayerPanel(i + 1, player.Name, player.Color);
                 PlayersStackPanel.Children.Add(playerPanel);
             }
+
+            UpdateColorSelections();
+        }
+
+        private StackPanel CreatePlayerPanel(int index, string name, string color)
+        {
+            StackPanel playerPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 5, 0, 5) };
+            TextBlock playerLabel = new TextBlock { Text = $"Hráč {index}:", Width = 60, VerticalAlignment = VerticalAlignment.Center };
+            TextBox playerName = new TextBox { Width = 120, Margin = new Thickness(5, 0, 5, 0), Text = name };
+            ComboBox playerColor = new ComboBox { Width = 100 };
+
+            playerColor.ItemsSource = _allColors.ToList();
+            playerColor.SelectedItem = color;
+
+            playerColor.SelectionChanged += PlayerColor_SelectionChanged;
+
+            playerPanel.Children.Add(playerLabel);
+            playerPanel.Children.Add(playerName);
+            playerPanel.Children.Add(playerColor);
+
+            return playerPanel;
         }
 
         private void ComboBoxPlayerCount_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -79,25 +84,50 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
 
             for(int i = 1; i <= playerCount; i++)
             {
-                StackPanel playerPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 5, 0, 5) };
-
-                TextBlock playerLabel = new TextBlock { Text = $"Hráč {i}:", Width = 60, VerticalAlignment = VerticalAlignment.Center };
-                TextBox playerName = new TextBox { Width = 120, Margin = new Thickness(5, 0, 5, 0), Name = $"PlayerName{i}" };
-                ComboBox playerColor = new ComboBox { Width = 100, Name = $"PlayerColor{i}" };
-
-                playerColor.Items.Add("Red");
-                playerColor.Items.Add("Blue");
-                playerColor.Items.Add("Green");
-                playerColor.Items.Add("Yellow");
-                playerColor.Items.Add("Purple");
-                playerColor.Items.Add("Orange");
-                playerColor.SelectedIndex = i - 1;
-
-                playerPanel.Children.Add(playerLabel);
-                playerPanel.Children.Add(playerName);
-                playerPanel.Children.Add(playerColor);
-
+                string defaultColor = _allColors[i - 1];
+                StackPanel playerPanel = CreatePlayerPanel(i, $"Hráč {i}", defaultColor);
                 PlayersStackPanel.Children.Add(playerPanel);
+            }
+
+            UpdateColorSelections();
+        }
+
+        private void PlayerColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateColorSelections();
+        }
+
+        private void UpdateColorSelections()
+        {
+            // 1. zjisti všechny barvy, které jsou aktuálně vybrané
+            var selectedColors = new List<string>();
+            foreach (StackPanel panel in PlayersStackPanel.Children)
+            {
+                ComboBox combo = panel.Children[2] as ComboBox;
+                if (combo.SelectedItem != null)
+                {
+                    selectedColors.Add(combo.SelectedItem.ToString());
+                }
+            }
+
+            // 2️. projdeme všechny hráče a nastavíme jim dostupné barvy
+            for (int i = 0; i < PlayersStackPanel.Children.Count; i++)
+            {
+                StackPanel panel = (StackPanel)PlayersStackPanel.Children[i];
+                ComboBox combo = (ComboBox)panel.Children[2];
+                string currentColor = combo.SelectedItem as string;
+
+                List<string> availableColors = new List<string>();
+                foreach (string color in _allColors)
+                {
+                    if (color == currentColor || !selectedColors.Contains(color))
+                    {
+                        availableColors.Add(color);
+                    }
+                }
+
+                combo.ItemsSource = availableColors;
+                combo.SelectedItem = currentColor;
             }
         }
 
