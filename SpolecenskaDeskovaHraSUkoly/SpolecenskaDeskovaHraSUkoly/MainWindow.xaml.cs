@@ -18,6 +18,13 @@ namespace SpolecenskaDeskovaHraSUkoly
         public MainWindow()
         {
             InitializeComponent();
+
+            this.Width = SystemParameters.PrimaryScreenWidth;
+            this.Height = SystemParameters.PrimaryScreenHeight;
+            this.MinWidth = SystemParameters.PrimaryScreenWidth - 1;
+            this.MinHeight = SystemParameters.PrimaryScreenHeight - 1;
+
+
             MainFrame.Navigate(new MainMenuPage(this));
         }
     }

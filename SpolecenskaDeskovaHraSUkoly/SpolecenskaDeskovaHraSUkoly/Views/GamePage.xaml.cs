@@ -35,7 +35,14 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
         private bool _isMainCountdown = false;
         private bool _taskCorrect = false;
 
-        public GamePage(MainWindow mainWindow, List<Player> players)
+        private string _selectedBoardType;
+        private string _selectedBoardSize;
+
+        private int totalTileCount;
+        private int boardWidthHeight;
+        private List<BoardTile> ActualBoard;
+
+        public GamePage(MainWindow mainWindow, List<Player> players, string selectedBoardType, string selectedBoardSize)
         {
             InitializeComponent();
             _mainWindow = mainWindow;
@@ -45,6 +52,9 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
 
             _gameState.Players = players;
             RefreshPlayersList();
+
+            this._selectedBoardType = selectedBoardType;
+            this._selectedBoardSize = selectedBoardSize;
 
             this.Loaded += GamePage_Loaded;
         }
@@ -76,14 +86,65 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
                 finalValue = value;
             }
 
-            var current = _gameState.CurrentPlayerIndex;
-            _gameState.Players[current].Position += finalValue;
+            var currentPlayer = _gameState.Players[_gameState.CurrentPlayerIndex];
+            currentPlayer.Position += finalValue;
 
-            int boardSize = 20;
-            _gameState.Players[current].Position %= boardSize;
+
+            currentPlayer.Position %= totalTileCount;
             RefreshPlayersList();
+            RenderPlayerEllipses();
 
-            ShowRandomTask();
+            BoardTile currentTile = ActualBoard[currentPlayer.Position];
+            char addRemovePoints;
+            if (currentTile.Type == TileType.Bonus)
+            {
+                int amountOfPoints = 2;
+                currentPlayer.Score += amountOfPoints;
+                RefreshPlayersList();
+
+                addRemovePoints = '+';
+                ShowBonusPenaltyOverlay(currentPlayer.Name, currentTile, addRemovePoints, amountOfPoints);
+
+            }
+            else if (currentTile.Type == TileType.Penalty)
+            {
+                int amountOfPoints;
+                if (currentPlayer.Score > 2)
+                {
+                    amountOfPoints = 2;
+                }
+                else
+                {
+                    amountOfPoints = 0;
+                }
+                currentPlayer.Score -= amountOfPoints;
+                RefreshPlayersList();
+
+                addRemovePoints = '-';
+                ShowBonusPenaltyOverlay(currentPlayer.Name, currentTile, addRemovePoints, amountOfPoints);
+            }
+            else if (currentTile.Type == TileType.Empty)
+            {
+                NextPlayerTurn();
+            }
+            else if (currentTile.Type == TileType.Task)
+            {
+                ShowRandomTask();
+            }
+            //work!!!
+        }
+
+        private void ShowBonusPenaltyOverlay(string currentPlayerName, BoardTile currentTile, char addRemovePoints, int amountOfPoints)
+        {
+            BonusPenaltyText.Text = currentTile.Type.ToString();
+            BonusPenaltyDesc.Text = $"{currentPlayerName}   {addRemovePoints}{amountOfPoints}";
+
+            BonusPenaltyGrid.Visibility = Visibility.Visible;
+            TaskButton.Visibility = Visibility.Visible;
+            TaskGrid.Visibility = Visibility.Collapsed;
+            CountdownGrid.Visibility = Visibility.Collapsed;
+            CorrectAnswerGrid.Visibility = Visibility.Collapsed;
+            Overlay.Visibility = Visibility.Visible;
         }
 
         private void ShowTaskOverlay(TaskItem task, string currentPlayerName)
@@ -97,10 +158,11 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
 
             TaskGrid.Visibility = Visibility.Visible;
             TaskButton.Visibility = Visibility.Visible;
-            BackButton1.Visibility = Visibility.Collapsed;
+            BackButton.Visibility = Visibility.Collapsed;
             ContinueButton.Visibility = Visibility.Collapsed;
             CountdownGrid.Visibility = Visibility.Collapsed;
             CorrectAnswerGrid.Visibility = Visibility.Collapsed;
+            BonusPenaltyGrid.Visibility = Visibility.Collapsed;
             Overlay.Visibility = Visibility.Visible;
         }
 
@@ -177,19 +239,21 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
             TaskGrid.Visibility = Visibility.Visible;
             TaskInstructionText.Text = _currentTask.Text;
             TaskButton.Visibility = Visibility.Collapsed;
-            BackButton1.Visibility = Visibility.Visible;
+            BackButton.Visibility = Visibility.Visible;
             ContinueButton.Visibility = Visibility.Visible;
         }
 
         private void ContinueButton_Click(object sender, RoutedEventArgs e)
         {
             TaskGrid.Visibility = Visibility.Collapsed;
+            BonusPenaltyGrid.Visibility = Visibility.Collapsed;
 
             NextPlayerTurn();
         }
 
         private void SuccessButton_Click(object sender, RoutedEventArgs e)
         {
+            ComboBoxPlayerAnswered.SelectedItem = null;
             _taskCorrect = true;
 
             FailButton.IsEnabled = false;
@@ -286,6 +350,8 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
                 }
 
                 TxtLastTask.Text = $"Nahráno {_tasks.Count} úkolů. Příklad: [{_tasks[0].Type}] {_tasks[0].Text}";
+
+                BoardTilePrint();
             }
             catch (Exception ex)
             {
@@ -293,6 +359,466 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
                 _mainWindow.MainFrame.Navigate(new GameSettingsPage(_mainWindow, _gameState.Players));
             }
         }
+
+        private void BoardTilePrint()
+        {
+            boardWidthHeight = 4; //Default
+
+            if(string.Equals(_selectedBoardSize, "4x4"))
+            {
+                boardWidthHeight = 4;
+            }
+            else if (string.Equals(_selectedBoardSize, "6x6"))
+            {
+                boardWidthHeight = 6;
+            }
+            else if (string.Equals(_selectedBoardSize, "8x8"))
+            {
+                boardWidthHeight = 8;
+            }
+            else if (string.Equals(_selectedBoardSize, "10x10"))
+            {
+                boardWidthHeight = 10;
+            }
+
+
+            //Circle Board
+            List<BoardTile> BoardCircle = new List<BoardTile>();
+
+            int index = 0;
+            for (int c = 0; c < boardWidthHeight; c++)
+            {
+                Direction from = Direction.Left;
+                Direction to = Direction.Right;
+                if(c == 0)
+                {
+                    from = Direction.Down;
+                }
+                else if(c == boardWidthHeight - 1)
+                {
+                    to = Direction.Down;
+                }
+                BoardCircle.Add(new BoardTile { Index = index, Row = 0, Column = c , From = from, To = to});
+                index++;
+            }
+
+            for (int r = 1; r < boardWidthHeight - 1; r++)
+            {
+                Direction from = Direction.Up;
+                Direction to = Direction.Down;
+                BoardCircle.Add(new BoardTile { Index = index, Row = r, Column = boardWidthHeight - 1, From = from, To = to });
+                index++;
+            }
+
+            for (int c = boardWidthHeight - 1; c >= 0; c--)
+            {
+                Direction from = Direction.Right;
+                Direction to = Direction.Left;
+                if (c == boardWidthHeight - 1)
+                {
+                    from = Direction.Up;
+                }
+                else if (c == 0)
+                {
+                    to = Direction.Up;
+                }
+                BoardCircle.Add(new BoardTile { Index = index, Row = boardWidthHeight - 1, Column = c, From = from, To = to });
+                index++;
+            }
+
+            for (int r = boardWidthHeight - 2; r > 0; r--)
+            {
+                Direction from = Direction.Down;
+                Direction to = Direction.Up;
+                BoardCircle.Add(new BoardTile { Index = index, Row = r, Column = 0, From = from, To = to });
+                index++;
+            }
+
+
+            //Snake Board
+            List<BoardTile> BoardSnake = new List<BoardTile>();
+
+            index = 0;
+            int row = 0;
+            for (int c = 0; c < boardWidthHeight; c++)
+            {
+                Direction from = Direction.Left;
+                Direction to = Direction.Right;
+                if (c == 0)
+                {
+                    from = Direction.Down;
+                }
+                else if (c == boardWidthHeight - 1)
+                {
+                    to = Direction.Down;
+                }
+                BoardSnake.Add(new BoardTile { Index = index, Row = row, Column = c, From = from, To = to });
+                index++;
+            }
+            row++;
+
+            while(row < boardWidthHeight - 1)
+            {
+                for (int c = boardWidthHeight - 1; c > 0; c--)
+                {
+                    Direction from = Direction.Right;
+                    Direction to = Direction.Left;
+                    if (c == boardWidthHeight - 1)
+                    {
+                        from = Direction.Up;
+                    }
+                    else if (c == 1)
+                    {
+                        to = Direction.Down;
+                    }
+                    BoardSnake.Add(new BoardTile { Index = index, Row = row, Column = c, From = from, To = to });
+                    index++;
+                }
+                row++;
+
+                for (int c = 1; c < boardWidthHeight; c++)
+                {
+                    Direction from = Direction.Left;
+                    Direction to = Direction.Right;
+                    if (c == 1)
+                    {
+                        from = Direction.Up;
+                    }
+                    else if (c == boardWidthHeight - 1)
+                    {
+                        to = Direction.Down;
+                    }
+                    BoardSnake.Add(new BoardTile { Index = index, Row = row, Column = c, From = from, To = to });
+                    index++;
+                }
+                row++;
+            }
+
+            for (int c = boardWidthHeight - 1; c >= 0; c--)
+            {
+                Direction from = Direction.Right;
+                Direction to = Direction.Left;
+                if (c == boardWidthHeight - 1)
+                {
+                    from = Direction.Up;
+                }
+                else if (c == 0)
+                {
+                    to = Direction.Up;
+                }
+                BoardSnake.Add(new BoardTile { Index = index, Row = row, Column = c, From = from, To = to });
+                index++;
+            }
+            row++;
+
+            for (int r = boardWidthHeight - 2; r > 0; r--)
+            {
+                Direction from = Direction.Down;
+                Direction to = Direction.Up;
+                BoardSnake.Add(new BoardTile { Index = index, Row = r, Column = 0, From = from, To = to });
+                index++;
+            }
+
+            
+
+            totalTileCount = boardWidthHeight * boardWidthHeight;
+
+            ActualBoard = BoardCircle; //default
+            if (string.Equals(_selectedBoardType, "Circle"))
+            {
+                ActualBoard = BoardCircle;
+                totalTileCount -= (boardWidthHeight - 2) * (boardWidthHeight - 2);
+            }
+            else if(string.Equals(_selectedBoardType, "Snake"))
+            {
+                ActualBoard = BoardSnake;
+            }
+
+            BoardGrid.RowDefinitions.Clear();
+            BoardGrid.ColumnDefinitions.Clear();
+
+            for (int i = 0; i < boardWidthHeight; i++)
+            {
+                BoardGrid.RowDefinitions.Add(new RowDefinition());
+                BoardGrid.ColumnDefinitions.Add(new ColumnDefinition());
+            }
+
+            BoardGrid.Width = BoardGrid.ActualWidth - 100;
+            BoardGrid.Height = BoardGrid.Width;
+            BoardGrid.HorizontalAlignment = HorizontalAlignment.Center;
+            BoardGrid.VerticalAlignment = VerticalAlignment.Center;
+            double tileWidth = (BoardGrid.Width / boardWidthHeight);
+            double tileHeight = tileWidth;
+
+            PlayerCanvas.Width = BoardGrid.Width;
+            PlayerCanvas.Height = BoardGrid.Height;
+            PlayerCanvas.HorizontalAlignment = HorizontalAlignment.Center;
+            PlayerCanvas.VerticalAlignment = VerticalAlignment.Center;
+
+
+            //totalTileCount
+
+            int bonusTileCount = (int)(totalTileCount * 0.15);
+            int penaltyTileCount = (int)(totalTileCount * 0.10);
+            int emptyTileCount = (int)(totalTileCount * 0.05);
+            int taskTileCount = totalTileCount - (bonusTileCount + penaltyTileCount + emptyTileCount);
+
+            Random rnd = new Random();
+            for(int i = 0; i < bonusTileCount; i++)
+            {
+                bool nalezenoPolicko = false;
+                while(!nalezenoPolicko)
+                {
+                    int cislo = rnd.Next(0, totalTileCount);
+
+                    BoardTile foundTile = ActualBoard[cislo];
+
+                    if(foundTile.Type == null)
+                    {
+                        foundTile.Type = TileType.Bonus;
+                        nalezenoPolicko = true;
+                    }
+                }
+            }
+
+            for (int i = 0; i < penaltyTileCount; i++)
+            {
+                bool nalezenoPolicko = false;
+                while (!nalezenoPolicko)
+                {
+                    int cislo = rnd.Next(0, totalTileCount);
+
+                    BoardTile foundTile = ActualBoard[cislo];
+
+                    if (foundTile.Type == null)
+                    {
+                        foundTile.Type = TileType.Penalty;
+                        nalezenoPolicko = true;
+                    }
+                }
+            }
+
+            for (int i = 0; i < emptyTileCount; i++)
+            {
+                bool nalezenoPolicko = false;
+                while (!nalezenoPolicko)
+                {
+                    int cislo = rnd.Next(0, totalTileCount);
+
+                    BoardTile foundTile = ActualBoard[cislo];
+
+                    if (foundTile.Type == null)
+                    {
+                        foundTile.Type = TileType.Empty;
+                        nalezenoPolicko = true;
+                    }
+                }
+            }
+
+            for (int i = 0; i < taskTileCount; i++)
+            {
+                bool nalezenoPolicko = false;
+                while (!nalezenoPolicko)
+                {
+                    int cislo = rnd.Next(0, totalTileCount);
+
+                    BoardTile foundTile = ActualBoard[cislo];
+
+                    if (foundTile.Type == null)
+                    {
+                        foundTile.Type = TileType.Task;
+                        nalezenoPolicko = true;
+                    }
+                }
+            }
+
+
+
+            foreach (var tile in ActualBoard)
+            {
+                Brush backgroundColor = null;
+                if(tile.Type == TileType.Bonus)
+                {
+                    backgroundColor = new SolidColorBrush(Color.FromRgb(51, 163, 52));
+                }
+                else if (tile.Type == TileType.Penalty)
+                {
+                    backgroundColor = new SolidColorBrush(Color.FromRgb(186, 47, 47));
+                }
+                else if (tile.Type == TileType.Empty)
+                {
+                    backgroundColor = Brushes.Gainsboro;
+                }
+                else if (tile.Type == TileType.Task)
+                {
+                    backgroundColor = new SolidColorBrush(Color.FromRgb(245, 231, 78));
+                }
+
+                Border b = new Border
+                {
+                    BorderThickness = GetBorderThickness(tile.From, tile.To),
+                    BorderBrush = Brushes.Black,
+                    Background = backgroundColor,
+                    Width = tileWidth,
+                    Height = tileHeight,
+                    CornerRadius = GetCornerRadius(tile.From, tile.To),
+                    Child = new TextBlock
+                    {
+                        Text = tile.Index.ToString(),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    }
+                };
+
+                Grid.SetRow(b, tile.Row);
+                Grid.SetColumn(b, tile.Column);
+                BoardGrid.Children.Add(b);
+            }
+
+            RenderPlayerEllipses();
+        }
+
+        private CornerRadius GetCornerRadius(Direction from, Direction to)
+        {
+            int cornerRadiusNumber = 15;
+            if((from == Direction.Down && to == Direction.Right) || (from == Direction.Right && to == Direction.Down))
+            {
+                return new CornerRadius(cornerRadiusNumber, 0, 0, 0);
+            }
+
+            if ((from == Direction.Down && to == Direction.Left) || (from == Direction.Left && to == Direction.Down))
+            {
+                return new CornerRadius(0, cornerRadiusNumber, 0, 0);
+            }
+
+            if ((from == Direction.Up && to == Direction.Left) || (from == Direction.Left && to == Direction.Up))
+            {
+                return new CornerRadius(0, 0, cornerRadiusNumber, 0);
+            }
+
+            if ((from == Direction.Up && to == Direction.Right) || (from == Direction.Right && to == Direction.Up))
+            {
+                return new CornerRadius(0, 0, 0, cornerRadiusNumber);
+            }
+
+            return new CornerRadius(0);
+        }
+
+        private Thickness GetBorderThickness(Direction from, Direction to)
+        {
+            double left = 3, top = 3, right = 3, bottom = 3;
+            if(from == Direction.Left || to == Direction.Left)
+            {
+                left = 1;
+            }
+            if (from == Direction.Up || to == Direction.Up)
+            {
+                top = 1;
+            }
+            if (from == Direction.Right || to == Direction.Right)
+            {
+                right = 1;
+            }
+            if (from == Direction.Down || to == Direction.Down)
+            {
+                bottom = 1;
+            }
+
+            return new Thickness(left, top, right, bottom);
+        }
+
+        private void RenderPlayerEllipses()
+        {
+            PlayerCanvas.Children.Clear();
+
+            for(int i = 0; i < totalTileCount; i++)
+            {
+                List<Player> playersOnTile = new List<Player>();
+                foreach(Player curPlayer in _gameState.Players)
+                {
+                    if(curPlayer.Position == i)
+                    {
+                        playersOnTile.Add(curPlayer);
+                    }
+                }
+
+                for(int j = 0; j < playersOnTile.Count; j++)
+                {
+                    double tileSize = (BoardGrid.Width / boardWidthHeight);
+                    double playerSize = (tileSize / 3) - (tileSize / 3) * 0.3;
+                    Ellipse playerEllipse = new Ellipse
+                    {
+                        Width = playerSize,
+                        Height = playerSize,
+                        Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(playersOnTile[j].Color)),
+                        Stroke = new SolidColorBrush(Colors.Black),
+                        StrokeThickness = 1.5
+                    };
+
+                    BoardTile currentTile = null;
+                    foreach(BoardTile tile in ActualBoard)
+                    {
+                        if(tile.Index == i)
+                        {
+                            currentTile = tile;
+                            break;
+                        }
+                    }
+
+                    double tileCenterX = currentTile.Column * tileSize + tileSize / 2;
+                    double tileCenterY = currentTile.Row * tileSize + tileSize / 2;
+
+                    double offsetX = 0;
+                    double offsetY = 0;
+
+                    switch(j)
+                    {
+                        case 0:
+                            {
+                                offsetX = -tileSize / 3;
+                                offsetY = -tileSize / 3;
+                            }
+                            break;
+                        case 1:
+                            {
+                                offsetY = -tileSize / 3;
+                            }
+                            break;
+                        case 2:
+                            {
+                                offsetX = tileSize / 3;
+                                offsetY = -tileSize / 3;
+                            }
+                            break;
+                        case 3:
+                            {
+                                offsetX = -tileSize / 3;
+                                offsetY = tileSize / 3;
+                            }
+                            break;
+                        case 4:
+                            {
+                                offsetY = tileSize / 3;
+                            }
+                            break;
+                        case 5:
+                            {
+                                offsetX = tileSize / 3;
+                                offsetY = tileSize / 3;
+                            }
+                            break;
+                    }
+
+                    Canvas.SetLeft(playerEllipse, tileCenterX - playerEllipse.Width / 2 + offsetX);
+                    Canvas.SetTop(playerEllipse, tileCenterY - playerEllipse.Height / 2 + offsetY);
+
+                    PlayerCanvas.Children.Add(playerEllipse);
+                }
+
+                
+            }
+        }
+
         private void ButtonLoadTasks_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -321,8 +847,8 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
                 return;
             }
 
-            int index = _rnd.Next(0, _tasks.Count);
-            TaskItem task = _tasks[index];
+            int taskIndex = _rnd.Next(0, _tasks.Count);
+            TaskItem task = _tasks[taskIndex];
 
             ShowTaskOverlay(task, _gameState.Players[_gameState.CurrentPlayerIndex].Name);
         }

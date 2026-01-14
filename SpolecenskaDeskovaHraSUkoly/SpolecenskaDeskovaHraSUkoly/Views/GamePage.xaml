@@ -15,18 +15,14 @@
         </Grid.ColumnDefinitions>
 
 
-        <!-- Placeholder hrací deska -->
+        
         <Border Grid.Column="0" BorderBrush="Gray" BorderThickness="2" CornerRadius="6" Padding="8">
-            <StackPanel>
-                <TextBlock Text="Hrací deska (placeholder)" FontSize="16" FontWeight="Bold" />
-                <TextBlock Text="(sem později přidáme vizuální pole / cesty)" Margin="0,8,0,12" />
-                <!-- Vykreslit políčka později -->
-                <Canvas x:Name="BoardCanvas" Height="300" Background="#FFF8F8F8" />
-            </StackPanel>
+            <Grid x:Name="BoardGrid" Background="#FFF8F8F8" />
         </Border>
+        <Canvas x:Name="PlayerCanvas" />
 
 
-        <StackPanel Grid.Column="1" Margin="12,0,0,0">
+            <StackPanel Grid.Column="1" Margin="12,0,0,0">
             <TextBlock Text="Ovládací panel" FontSize="16" FontWeight="Bold" />
 
             <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
@@ -64,7 +60,7 @@
                 <TextBlock x:Name="TaskTypeText" FontSize="28" FontWeight="Bold" TextAlignment="Center" Grid.Row="0" VerticalAlignment="Center" />
                 <TextBlock x:Name="TaskInstructionText" FontSize="18" TextAlignment="Center" TextWrapping="Wrap" Grid.Row="1" VerticalAlignment="Center" />
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="2">
-                    <Button x:Name="BackButton1" Content="Zpět" Width="120" Height="40" Margin="0,0,5,0" Click="BackButton_Click" />
+                    <Button x:Name="BackButton" Content="Zpět" Width="120" Height="40" Margin="0,0,5,0" Click="BackButton_Click" />
                     <Button x:Name="ContinueButton" Content="Pokračovat" Width="120" Height="40" Margin="5,0,0,0" Click="ContinueButton_Click" />
                     <Button x:Name="TaskButton" Content="Zobrazit úkol" Width="200" Height="40" Margin="5,0,0,0" VerticalAlignment="Center" Click="TaskButton_Click"/>
                 </StackPanel>
@@ -99,6 +95,17 @@
                     <Button x:Name="BackButton2" Content="Zpět" Width="120" Height="40" Margin="0,0,5,0" Click="BackButton_Click" />
                     <Button x:Name="AddPointsButton" Content="Připsat body" Width="120" Height="40" Margin="5,0,0,0" Click="AddPointsButton_Click" />
                 </StackPanel>
+            </Grid>
+            <Grid x:Name="BonusPenaltyGrid" Width="400" Height="200" Background="White" Opacity="0.95">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock x:Name="BonusPenaltyText" FontSize="28" FontWeight="Bold" TextAlignment="Center" Grid.Row="0" VerticalAlignment="Center" />
+                <TextBlock x:Name="BonusPenaltyDesc" FontSize="22" TextAlignment="Center" TextWrapping="Wrap" Grid.Row="1" VerticalAlignment="Center" />
+                <Button x:Name="BonusPenaltyContinueButton" Content="Pokračovat" Width="120" Height="40" Margin="5,0,0,0" Grid.Row="2" Click="ContinueButton_Click" />
             </Grid>
         </Grid>
     </Grid>

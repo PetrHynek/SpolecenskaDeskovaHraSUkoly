@@ -23,7 +23,9 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
     {
         private MainWindow _mainWindow;
         private List<Player> _existingPlayers;
-        private List<string> _allColors = new List<string> { "Red", "Blue", "Green", "Yellow", "Purple", "Orange" };
+        private List<string> _allColors = new List<string> { "Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Aqua", "Indigo", "Yellowgreen" };
+        private List<string> _boardTypes = new List<string> { "Circle", "Snake" };
+        private List<string> _boardSize = new List<string> { "4x4", "6x6", "8x8", "10x10" };
 
         public GameSettingsPage(MainWindow mainWindow, List<Player> existingPlayers = null)
         {
@@ -40,6 +42,12 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
             {
                 ComboBoxPlayerCount.SelectedIndex = 0;
             }
+
+            ComboBoxBoardType.ItemsSource = _boardTypes;
+            ComboBoxBoardType.SelectedIndex = 0;
+
+            ComboBoxBoardSize.ItemsSource = _boardSize;
+            ComboBoxBoardSize.SelectedIndex = 0;
         }
 
         private void PopulateExistingPlayers()
@@ -82,10 +90,10 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
 
             int playerCount = ComboBoxPlayerCount.SelectedIndex + 2;
 
-            for(int i = 1; i <= playerCount; i++)
+            for(int i = 0; i < playerCount; i++)
             {
-                string defaultColor = _allColors[i - 1];
-                StackPanel playerPanel = CreatePlayerPanel(i, $"Hráč {i}", defaultColor);
+                string defaultColor = _allColors[i];
+                StackPanel playerPanel = CreatePlayerPanel(i + 1, $"Hráč {i + 1}", defaultColor);
                 PlayersStackPanel.Children.Add(playerPanel);
             }
 
@@ -113,8 +121,8 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
             // 2️. projdeme všechny hráče a nastavíme jim dostupné barvy
             for (int i = 0; i < PlayersStackPanel.Children.Count; i++)
             {
-                StackPanel panel = (StackPanel)PlayersStackPanel.Children[i];
-                ComboBox combo = (ComboBox)panel.Children[2];
+                StackPanel panel = PlayersStackPanel.Children[i] as StackPanel;
+                ComboBox combo = panel.Children[2] as ComboBox;
                 string currentColor = combo.SelectedItem as string;
 
                 List<string> availableColors = new List<string>();
@@ -184,7 +192,10 @@ namespace SpolecenskaDeskovaHraSUkoly.Views
                 return;
             }
 
-            _mainWindow.MainFrame.Navigate(new GamePage(_mainWindow, players));
+            string selectedBoardType = (string)ComboBoxBoardType.SelectedItem;
+            string selectedBoardSize = (string)ComboBoxBoardSize.SelectedItem;
+
+            _mainWindow.MainFrame.Navigate(new GamePage(_mainWindow, players, selectedBoardType, selectedBoardSize));
         }
     }
 }
