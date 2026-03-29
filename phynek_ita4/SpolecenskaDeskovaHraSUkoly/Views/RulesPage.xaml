@@ -1,0 +1,176 @@
+﻿<Page x:Class="SpolecenskaDeskovaHraSUkoly.Views.RulesPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:SpolecenskaDeskovaHraSUkoly.Views"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Background="#F0F2F5"
+      UseLayoutRounding="True"
+      SnapsToDevicePixels="True"
+      Title="RulesPage">
+
+    <Grid>
+        <Grid Margin="60,30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Pravidla hry" Grid.Row="0" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="10" Margin="0,20" FontSize="15">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="15,5">
+                        <TextBlock Text="Cíl hry" FontSize="22" FontWeight="Bold" Margin="0,10,0,5"/>
+                        <Border Style="{StaticResource BorderStyle}" Padding="10,15" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="Cílem hry je procházet hrací desku, plnit úkoly a získávat body."/>
+                                <TextBlock Text="Hráč vyhrává ve chvíli, kdy jako první dosáhne stanoveného počtu bodů."/>
+                                <TextBlock Text="Výchozí hodnota je 30 bodů, ale může být upravena podle domluvy hráčů."/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Co je potřeba ke hře" FontSize="22" FontWeight="Bold" Margin="0,10,0,5"/>
+                        <Border Style="{StaticResource BorderStyle}" Padding="10,15" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="- Papír"/>
+                                <TextBlock Text="- Tužka"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Typy políček" FontSize="22" FontWeight="Bold" Margin="0,10,0,5"/>
+                        <Border Style="{StaticResource BorderStyle}" Padding="10,15" Margin="0,0,0,15">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Border Width="40" Height="40" Background="#f5e74e" Margin="0,0,10,0" BorderThickness="2" BorderBrush="Black"/>
+                                    <StackPanel>
+                                        <TextBlock Text="Políčko s úkolem" FontWeight="Bold"/>
+                                        <TextBlock Text="Hráč dostane náhodný úkol. Na splnění úkolů má stanovený časový limit. Pokud hráč na tahu úspěšně předvede úkol a jiný hráč jej uhodne, oba obdrží 1 bod." TextWrapping="Wrap" Width="500"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Border Width="40" Height="40" Background="#33a334" Margin="0,0,10,0" BorderThickness="2" BorderBrush="Black"/>
+                                    <StackPanel>
+                                        <TextBlock Text="Bonusové políčko" FontWeight="Bold"/>
+                                        <TextBlock Text="Hráči se přičtou 3 body." TextWrapping="Wrap" Width="500"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Border Width="40" Height="40" Background="#ba2f2f" Margin="0,0,10,0" BorderThickness="2" BorderBrush="Black"/>
+                                    <StackPanel>
+                                        <TextBlock Text="Trestné políčko" FontWeight="Bold"/>
+                                        <TextBlock Text="Hráči se odečtou 2 body. Počet bodů nemůže klesnout pod nulu." TextWrapping="Wrap" Width="500"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <Border Width="40" Height="40" Background="#DCDCDC" Margin="0,0,10,0" BorderThickness="2" BorderBrush="Black"/>
+                                    <StackPanel>
+                                        <TextBlock Text="Prázdné políčko" FontWeight="Bold"/>
+                                        <TextBlock Text="Nestane se žádná akce. Tah končí a pokračuje další hráč." TextWrapping="Wrap" Width="500"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="15,5">
+                        <TextBlock Text="Jak probíhá tah" FontSize="22" FontWeight="Bold" Margin="0,10,0,5"/>
+                        <Border Style="{StaticResource BorderStyle}" Padding="10,15" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="1. Hráč hodí kostkou."/>
+                                <TextBlock Text="2. Figurka se posune o odpovídající počet polí."/>
+                                <TextBlock Text="3. Podle typu políčka, na které figurka skončí, nastane jedna z následujících situací:"/>
+                                <StackPanel Margin="20,0,0,0">
+                                    <TextBlock Text="- hráč dostane náhodný úkol,"/>
+                                    <TextBlock Text="- získá bonusové body,"/>
+                                    <TextBlock Text="- ztratí body,"/>
+                                    <TextBlock Text="- nebo se nestane nic."/>
+                                </StackPanel>
+                                <TextBlock Text="4. Po ukončení tahu je na řadě další hráč."/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Typy úkolů" FontSize="22" FontWeight="Bold" Margin="0,10,0,5"/>
+                        <Border Style="{StaticResource BorderStyle}" Padding="10,15" Margin="0,0,0,15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Background="#D64545" Grid.Column="0" CornerRadius="4,0,0,4"/>
+                                <StackPanel Grid.Column="1" Margin="15,0,0,0">
+                                    <TextBlock Text="Kreslení" FontSize="18" FontWeight="Bold"/>
+                                    <Separator Margin="0,5,0,8"/>
+
+                                    <TextBlock TextWrapping="Wrap">
+                                        Hráč musí nakreslit zadanou věc na papír tak, aby ji ostatní hráči dokázali uhodnout.
+                                        Nesmí však použít žádná písmena, čísla ani slova - kresba musí být čistě vizuální.
+                                        Ostatní hráči hádají, o jaký pojem se jedná. Na splnění úkolu je stanoven časový limit.
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource BorderStyle}" Padding="10,15" Margin="0,0,0,15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Background="#F4A261" Grid.Column="0" CornerRadius="4,0,0,4"/>
+                                <StackPanel Grid.Column="1" Margin="15,0,0,0">
+                                    <TextBlock Text="Opis" FontSize="18" FontWeight="Bold"/>
+                                    <Separator Margin="0,5,0,8"/>
+
+                                    <TextBlock TextWrapping="Wrap">
+                                        Hráč musí slovně opsat zadanou věc tak, aby ji ostatní dokázali uhodnout.
+                                        Nesmí však použít samotné hledané slovo ani žádné jeho odvozeniny,
+                                        části slova nebo velmi podobné výrazy. Musí tedy použít jiné formulace,
+                                        přirovnání nebo vysvětlení významu pomocí opisu. Ostatní hráči hádají během časového limitu.
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource BorderStyle}" Padding="10,15" Margin="0,0,0,15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Background="#F4D35E" Grid.Column="0" CornerRadius="4,0,0,4"/>
+                                <StackPanel Grid.Column="1" Margin="15,0,0,0">
+                                    <TextBlock Text="Pantomima" FontSize="18" FontWeight="Bold"/>
+                                    <Separator Margin="0,5,0,8"/>
+
+                                    <TextBlock TextWrapping="Wrap">
+                                        Hráč musí beze slov předvést zadanou věc pomocí gest, pohybů rukou nebo celého těla.
+                                        Nesmí mluvit, vydávat zvuky ani napovídat pomocí slov. Ostatní hráči se snaží během časového limitu uhodnout,
+                                        co je předváděno.
+                                    </TextBlock>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <Border Style="{StaticResource BorderStyle}" Width="180" Height="60" Grid.Row="2" HorizontalAlignment="Left">
+                <Button Content="Zpět" Style="{StaticResource ButtonStyle}" Click="BackBtn_Click"/>
+            </Border>
+        </Grid>
+    </Grid>
+</Page>
